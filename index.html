@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Git Battle — Learn Git by Fighting</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════ HOME SCREEN -->
+  <div id="screen-home" class="screen active">
+    <div class="home-inner">
+      <div class="logo-block">
+        <span class="logo-icon">⚔</span>
+        <h1 class="logo-title">GIT<span class="accent">BATTLE</span></h1>
+        <p class="logo-sub">Master Git. One boss at a time.</p>
+      </div>
+
+      <div class="tier-grid">
+        <button class="tier-card" data-tier="beginner" onclick="startBattle('beginner')">
+          <span class="tier-enemy">👾</span>
+          <div class="tier-info">
+            <span class="tier-badge beginner">BEGINNER</span>
+            <h3>The Noob Ghost</h3>
+            <p>git clone, git add, git commit, git push</p>
+            <div class="tier-stats">
+              <span>❤️ 100 HP · 5 hearts</span>
+              <span>👾 80 HP · hits -10</span>
+            </div>
+          </div>
+          <span class="tier-mode-tag">Flashcard</span>
+        </button>
+
+        <button class="tier-card" data-tier="intermediate" onclick="startBattle('intermediate')">
+          <span class="tier-enemy">👹</span>
+          <div class="tier-info">
+            <span class="tier-badge intermediate">INTERMEDIATE</span>
+            <h3>The Merge Demon</h3>
+            <p>branches, merging, stash, git log, remotes</p>
+            <div class="tier-stats">
+              <span>❤️ 80 HP · 4 hearts</span>
+              <span>👹 120 HP · hits -15</span>
+            </div>
+          </div>
+          <span class="tier-mode-tag">Matching</span>
+        </button>
+
+        <button class="tier-card" data-tier="experienced" onclick="startBattle('experienced')">
+          <span class="tier-enemy">💀</span>
+          <div class="tier-info">
+            <span class="tier-badge experienced">EXPERIENCED</span>
+            <h3>The Rebase Overlord</h3>
+            <p>rebase, upstream, cherry-pick, reset --hard</p>
+            <div class="tier-stats">
+              <span>❤️ 60 HP · 3 hearts</span>
+              <span>💀 150 HP · hits -20</span>
+            </div>
+          </div>
+          <span class="tier-mode-tag">Type-in</span>
+        </button>
+      </div>
+
+      <div id="weakness-panel" class="weakness-panel hidden">
+        <h4>⚠ Your Weak Areas</h4>
+        <div id="weakness-list"></div>
+        <button class="btn-secondary" onclick="startAdaptiveBattle()">Train Weak Areas</button>
+        <button class="btn-ghost" onclick="resetProgress()">Reset Progress</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ BATTLE SCREEN -->
+  <div id="screen-battle" class="screen">
+    <div class="battle-layout">
+
+      <!-- Top bar -->
+      <div class="battle-topbar">
+        <button class="btn-ghost-sm" onclick="exitBattle()">← Exit</button>
+        <div class="progress-bar-wrap">
+          <div id="progress-bar" class="progress-bar-fill"></div>
+        </div>
+        <span id="progress-label" class="progress-label">1 / 10</span>
+      </div>
+
+      <!-- Arena -->
+      <div class="arena">
+
+        <!-- Player side -->
+        <div class="combatant player-side">
+          <div class="combatant-name" id="player-name">You</div>
+          <div class="hp-bar-wrap">
+            <div class="hp-bar-bg">
+              <div id="player-hp-bar" class="hp-bar-fill player-hp"></div>
+            </div>
+            <span id="player-hp-label" class="hp-label">100</span>
+          </div>
+          <div id="hearts-row" class="hearts-row"></div>
+          <div class="sprite player-sprite" id="player-sprite">🧑‍💻</div>
+        </div>
+
+        <!-- Center timer -->
+        <div class="timer-zone">
+          <svg class="timer-ring" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="34" class="timer-track" />
+            <circle cx="40" cy="40" r="34" class="timer-fill" id="timer-circle" />
+          </svg>
+          <span id="timer-number" class="timer-number">15</span>
+          <div id="combo-banner" class="combo-banner hidden">COMBO ×2!</div>
+        </div>
+
+        <!-- Enemy side -->
+        <div class="combatant enemy-side">
+          <div class="combatant-name" id="enemy-name">Noob Ghost</div>
+          <div class="hp-bar-wrap">
+            <div class="hp-bar-bg">
+              <div id="enemy-hp-bar" class="hp-bar-fill enemy-hp"></div>
+            </div>
+            <span id="enemy-hp-label" class="hp-label">80</span>
+          </div>
+          <div class="sprite enemy-sprite" id="enemy-sprite">👾</div>
+        </div>
+
+      </div>
+
+      <!-- Question card -->
+      <div class="question-zone">
+        <div id="question-card" class="question-card">
+
+          <!-- Beginner face — type-in answer -->
+          <div id="flashcard-face" class="card-face hidden">
+            <div class="card-category" id="fc-category"></div>
+            <div class="card-question" id="fc-question"></div>
+            <div id="fc-wrong-reveal" class="wrong-reveal hidden">
+              <span class="wrong-label">✗ Wrong. Correct answer:</span>
+              <code id="fc-correct-text"></code>
+            </div>
+            <div class="fc-hint-row">
+              <button class="btn-hint" id="fc-hint-btn" onclick="showHint('fc')">? Hint</button>
+              <span id="fc-hint-text" class="hint-text hidden"></span>
+            </div>
+            <div class="sub-input-row">
+              <input id="fc-input" type="text" class="sub-input" placeholder="Type the git command..." autocomplete="off" spellcheck="false" />
+              <button class="btn-submit" onclick="submitFlashcard()">Submit</button>
+            </div>
+          </div>
+
+          <!-- Matching face -->
+          <div id="matching-face" class="card-face hidden">
+            <div class="card-category" id="mt-category"></div>
+            <p class="match-instruction">Match each description to the correct Git command</p>
+            <div class="match-arena" id="match-arena"></div>
+            <div id="mt-wrong-reveal" class="wrong-reveal hidden">
+              <span class="wrong-label">✗ Time's up! Correct matches:</span>
+              <div id="mt-correct-list" class="correct-list"></div>
+            </div>
+          </div>
+
+          <!-- Subjective face -->
+          <div id="subjective-face" class="card-face hidden">
+            <div class="card-category" id="sub-category"></div>
+            <div class="card-question" id="sub-question"></div>
+            <div id="sub-wrong-reveal" class="wrong-reveal hidden">
+              <span class="wrong-label">✗ Wrong. Correct answer:</span>
+              <code id="sub-correct-text"></code>
+            </div>
+            <div class="fc-hint-row">
+              <button class="btn-hint" id="sub-hint-btn" onclick="showHint('sub')">? Hint</button>
+              <span id="sub-hint-text" class="hint-text hidden"></span>
+            </div>
+            <div class="sub-input-row">
+              <input id="sub-input" type="text" class="sub-input" placeholder="Type the git command..." autocomplete="off" spellcheck="false" />
+              <button class="btn-submit" onclick="submitSubjective()">Submit</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ END SCREEN -->
+  <div id="screen-end" class="screen">
+    <div class="end-inner">
+      <div id="end-banner" class="end-banner"></div>
+      <div class="end-stats">
+        <div class="stat-block"><span class="stat-num" id="end-score">0</span><span class="stat-lbl">Correct</span></div>
+        <div class="stat-block"><span class="stat-num" id="end-combo">0</span><span class="stat-lbl">Max Combo</span></div>
+        <div class="stat-block"><span class="stat-num" id="end-dmg">0</span><span class="stat-lbl">Damage Dealt</span></div>
+      </div>
+      <div id="end-breakdown" class="end-breakdown"></div>
+      <div class="end-actions">
+        <button class="btn-primary" onclick="showScreen('screen-home')">Back to Home</button>
+        <button class="btn-secondary" id="btn-retry" onclick="retryBattle()">Retry</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
